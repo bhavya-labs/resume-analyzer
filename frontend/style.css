@@ -1222,13 +1222,15 @@ textarea:focus {
 .job-card-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
+    gap: 8px;
 }
 
 .job-title {
     font-weight: 600;
     font-size: 13.5px;
     color: var(--text-primary);
+    flex: 1;
 }
 
 .job-match-badge {
@@ -1239,13 +1241,15 @@ textarea:focus {
     background: var(--info-bg);
     padding: 2px 6px;
     border-radius: 4px;
+    white-space: nowrap;
 }
 
 .job-meta {
     font-size: 11px;
     color: var(--text-dark);
     display: flex;
-    gap: 12px;
+    flex-wrap: wrap;
+    gap: 6px 12px;
 }
 
 .job-meta span {
@@ -1620,6 +1624,9 @@ textarea:focus {
         max-width: 100% !important;
         min-width: 0 !important;
     }
+    .score-gauge-card h3 {
+        text-align: center !important;
+    }
 }
 
 @media (max-width: 768px) {
@@ -1631,6 +1638,19 @@ textarea:focus {
 
     .top-nav {
         padding-bottom: 16px;
+        align-items: flex-start !important;
+    }
+
+    .header-left {
+        align-items: flex-start !important;
+    }
+
+    .btn-toggle-sidebar {
+        margin-top: 2px !important; /* Center with the first line of wrapped title */
+    }
+
+    .profile-avatar {
+        margin-top: 2px !important; /* Center with the first line of wrapped title */
     }
 
     .header-titles h1 {
@@ -1639,6 +1659,16 @@ textarea:focus {
 
     .subtitle {
         display: none; /* Hide subtitle on mobile for a clean compact header */
+    }
+
+    /* Full-width action submit button on mobile */
+    .btn-submit {
+        width: 100% !important;
+        padding: 14px 20px !important;
+        font-size: 15px !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     /* Optimize tab buttons for small screens to prevent wrapping overflow */
