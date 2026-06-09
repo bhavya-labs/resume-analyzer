@@ -79,21 +79,48 @@ document.addEventListener("DOMContentLoaded", () => {
 function setupSidebarToggle() {
     const sidebar = document.querySelector(".sidebar");
     const btnToggleSidebar = document.getElementById("btnToggleSidebar");
+    const overlay = document.getElementById("sidebarOverlay");
     
-    // Load preference
-    const isCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
+    // Check if preference is stored, otherwise default to collapsed on mobile and open on desktop
+    let isCollapsed = localStorage.getItem("sidebarCollapsed");
+    if (isCollapsed === null) {
+        isCollapsed = window.innerWidth <= 1024;
+    } else {
+        isCollapsed = isCollapsed === "true";
+    }
+    
     if (isCollapsed) {
         sidebar.classList.add("collapsed");
+        if (overlay) overlay.classList.remove("active");
+    } else {
+        sidebar.classList.remove("collapsed");
+        if (overlay && window.innerWidth <= 1024) overlay.classList.add("active");
     }
     
     btnToggleSidebar.addEventListener("click", () => {
-        sidebar.classList.toggle("collapsed");
-        localStorage.setItem("sidebarCollapsed", sidebar.classList.contains("collapsed"));
+        const collapsed = sidebar.classList.toggle("collapsed");
+        localStorage.setItem("sidebarCollapsed", collapsed);
+        
+        if (overlay) {
+            if (collapsed) {
+                overlay.classList.remove("active");
+            } else if (window.innerWidth <= 1024) {
+                overlay.classList.add("active");
+            }
+        }
     });
+
+    if (overlay) {
+        overlay.addEventListener("click", () => {
+            sidebar.classList.add("collapsed");
+            overlay.classList.remove("active");
+            localStorage.setItem("sidebarCollapsed", "true");
+        });
+    }
     
     // Force Chart.js resize once sidebar animation completes
     sidebar.addEventListener("transitionend", (e) => {
-        if (e.propertyName === "width" && currentChartInstance) {
+        if ((e.propertyName === "width" || e.propertyName === "transform") && currentChartInstance) {
             currentChartInstance.resize();
         }
     });
