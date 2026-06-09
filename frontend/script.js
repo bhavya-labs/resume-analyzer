@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://resume-analyzer-backend-ol4a.onrender.com";
+const API_BASE_URL = "https://resume-analyzer-backend-ol4a.onrender.com"; // Updated for production deployment
 let selectedFile = null;
 let currentChartInstance = null;
 let cachedJobsTemplates = [];
