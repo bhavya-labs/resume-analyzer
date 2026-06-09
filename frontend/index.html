@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume AI - Resume Analyzer & Job Matching Dashboard</title>
+    <!-- Google Fonts: Outfit & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="app-container">
+
+        <!-- Sidebar: History & Control Panel -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fa-solid fa-cube logo-icon"></i>
+                    <span>Resume <span class="badge">AI</span></span>
+                </div>
+            </div>
+
+            <div class="server-status">
+                <span class="status-dot online" id="statusDot"></span>
+                <span id="statusText">Connecting server...</span>
+            </div>
+
+            <nav class="history-panel">
+                <div class="section-title">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Scan History</span>
+                </div>
+                <div class="history-list" id="historyList">
+                    <!-- Loaded dynamically via JavaScript -->
+                    <div class="empty-history">
+                        <i class="fa-regular fa-folder-open"></i>
+                        <p>No previous scans found</p>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <p>v1.2.0 • Premium Dashboard</p>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+
+            <!-- Top Navigation / Header -->
+            <header class="top-nav">
+                <div class="header-left">
+                    <button type="button" class="btn-toggle-sidebar" id="btnToggleSidebar" title="Toggle Sidebar">
+                        <i class="fa-solid fa-bars-staggered"></i>
+                    </button>
+                    <div class="header-titles">
+                        <h1>AI Resume Analyzer & Matcher</h1>
+                        <p class="subtitle">Optimize your resume against Applicant Tracking Systems (ATS) and unlock job
+                            matches</p>
+                    </div>
+                </div>
+                <div class="user-profile">
+                    <div class="profile-avatar">
+                        <i class="fa-solid fa-user-astronaut"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Analysis Workspace (Inputs) -->
+            <section class="workspace-section">
+                <div class="input-grid">
+
+                    <!-- Upload Card -->
+                    <div class="card glass-card upload-card" id="uploadCard">
+                        <div class="card-header">
+                            <i class="fa-solid fa-file-pdf icon-purple"></i>
+                            <h3>Upload Resume</h3>
+                        </div>
+
+                        <div class="drop-zone" id="dropZone">
+                            <input type="file" id="resume" accept=".pdf" required class="file-input">
+                            <div class="drop-zone-content">
+                                <div class="drop-icon-wrapper">
+                                    <i class="fa-solid fa-cloud-arrow-up cloud-icon"></i>
+                                </div>
+                                <h4>Drag & drop your resume</h4>
+                                <p>Supports PDF format up to 5MB</p>
+                                <span class="btn-browse">Browse Files</span>
+                            </div>
+                            <div class="file-selected-state" id="fileSelectedState" style="display: none;">
+                                <i class="fa-solid fa-file-circle-check selected-icon"></i>
+                                <span class="file-name" id="selectedFileName">resume_sample.pdf</span>
+                                <span class="file-size" id="selectedFileSize">1.2 MB</span>
+                                <button type="button" class="btn-remove-file" id="btnRemoveFile">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Job Description Card -->
+                    <div class="card glass-card jd-card">
+                        <div class="card-header">
+                            <i class="fa-solid fa-briefcase icon-blue"></i>
+                            <h3>Job Description</h3>
+                        </div>
+
+                        <div class="jd-input-wrapper">
+                            <textarea id="job"
+                                placeholder="Paste the complete job description text here, or click one of the quick-load templates below..."></textarea>
+
+                            <div class="quick-templates">
+                                <span class="template-label">Quick Templates:</span>
+                                <div class="template-buttons" id="templateButtons">
+                                    <!-- Rendered dynamically -->
+                                    <span class="loading-templates">Loading templates...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="action-bar">
+                    <button type="button" class="btn-submit" id="btnAnalyze">
+                        <span class="btn-text">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Analyze Resume
+                        </span>
+                        <div class="btn-loader" style="display: none;">
+                            <i class="fa-solid fa-circle-notch fa-spin"></i> Processing...
+                        </div>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Loading Overlay -->
+            <section class="loading-section" id="loadingSection" style="display: none;">
+                <div class="loading-card glass-card">
+                    <div class="scanner-glow"></div>
+                    <i class="fa-solid fa-shield-halved scanning-icon"></i>
+                    <h2>Analyzing Resume Structure</h2>
+                    <p id="loadingStatusText">Extracting PDF text and parsing sections...</p>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" id="progressBarFill"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Dashboard -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+
+                <div class="dashboard-grid">
+
+                    <!-- Left Column: Main Detailed Insights -->
+                    <div class="dashboard-main">
+
+                        <!-- Skills Match Card -->
+                        <div class="card glass-card skills-match-card">
+                            <div class="card-header">
+                                <i class="fa-solid fa-list-check icon-green"></i>
+                                <h3>Skills Analysis</h3>
+                            </div>
+                            <div class="skills-tab-headers">
+                                <button class="skills-tab-btn active" id="tabMissingBtn">
+                                    Missing Skills <span class="badge badge-danger" id="missingBadgeCount">0</span>
+                                </button>
+                                <button class="skills-tab-btn" id="tabMatchedBtn">
+                                    Matched Skills <span class="badge badge-success" id="matchedBadgeCount">0</span>
+                                </button>
+                            </div>
+
+                            <div class="skills-tab-content">
+                                <!-- Missing Skills Pane -->
+                                <div class="skills-pane active" id="paneMissing">
+                                    <p class="pane-description">These skills were found in the job description but not in your resume. <strong>Click any skill tag below</strong> to get an ATS-optimized bullet point suggestion on how to add it:</p>
+                                    <div class="skills-tags-container" id="missingSkillsContainer">
+                                        <!-- Rendered dynamically -->
+                                    </div>
+                                </div>
+
+                                <!-- Matched Skills Pane -->
+                                <div class="skills-pane" id="paneMatched">
+                                    <p class="pane-description">Great! These skills match the job description
+                                        requirements:</p>
+                                    <div class="skills-tags-container" id="matchedSkillsContainer">
+                                        <!-- Rendered dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Recommendations Card -->
+                        <div class="card glass-card feedback-card">
+                            <div class="card-header">
+                                <i class="fa-solid fa-brain icon-orange"></i>
+                                <h3>AI Feedback & Suggestions</h3>
+                            </div>
+
+                            <div class="feedback-accordion">
+                                <!-- Section: Skills Gap -->
+                                <div class="accordion-item open">
+                                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                                        <span><i class="fa-solid fa-code-fork"></i> Skills Optimization</span>
+                                        <i class="fa-solid fa-chevron-down arrow-icon"></i>
+                                    </div>
+                                    <div class="accordion-content" id="feedbackSkillsList">
+                                        <!-- Rendered dynamically -->
+                                    </div>
+                                </div>
+
+                                <!-- Section: Formatting -->
+                                <div class="accordion-item">
+                                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                                        <span><i class="fa-solid fa-file-lines"></i> Layout & Format Checks</span>
+                                        <i class="fa-solid fa-chevron-down arrow-icon"></i>
+                                    </div>
+                                    <div class="accordion-content" id="feedbackFormattingList">
+                                        <!-- Rendered dynamically -->
+                                    </div>
+                                </div>
+
+                                <!-- Section: Impact -->
+                                <div class="accordion-item">
+                                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                                        <span><i class="fa-solid fa-chart-line"></i> Content Impact & Quality</span>
+                                        <i class="fa-solid fa-chevron-down arrow-icon"></i>
+                                    </div>
+                                    <div class="accordion-content" id="feedbackContentList">
+                                        <!-- Rendered dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recommended Jobs Card -->
+                        <div class="card glass-card rec-jobs-card">
+                            <div class="card-header">
+                                <i class="fa-solid fa-magnifying-glass-location icon-teal"></i>
+                                <h3>Recommended Career Opportunities</h3>
+                            </div>
+                            <p class="rec-description">Matching career listings based on semantic overlap with your
+                                profile:</p>
+                            <div class="jobs-list" id="recommendedJobsContainer">
+                                <!-- Rendered dynamically -->
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Column: High-level Metrics & Checklist -->
+                    <div class="dashboard-sidebar">
+
+                        <!-- Circular Score Gauge -->
+                        <div class="card glass-card score-gauge-card">
+                            <h3>ATS Overall Score</h3>
+                            <div class="gauge-wrapper">
+                                <div class="svg-gauge-container">
+                                    <svg class="gauge-svg" viewBox="0 0 100 100">
+                                        <circle class="gauge-bg" cx="50" cy="50" r="40" />
+                                        <circle class="gauge-progress" id="gaugeProgressPath" cx="50" cy="50" r="40" />
+                                    </svg>
+                                    <div class="gauge-text">
+                                        <span class="gauge-percentage" id="atsScoreValue">0%</span>
+                                        <span class="gauge-rating" id="atsRatingLabel">Fair Match</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="gauge-info">Calculated from Semantic Match, Skill Density, and Resume Structure.
+                            </p>
+                        </div>
+
+                        <!-- Breakdown Bar Chart -->
+                        <div class="card glass-card chart-card">
+                            <h3>Score Breakdown</h3>
+                            <div class="chart-container">
+                                <canvas id="breakdownChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Formatting & Content Checklist -->
+                        <div class="card glass-card checklist-card">
+                            <div class="card-header">
+                                <i class="fa-solid fa-circle-check icon-purple"></i>
+                                <h3>Structure & Formatting</h3>
+                            </div>
+                            <div class="checklist-container">
+                                <div class="checklist-item" id="checkContact">
+                                    <i class="fa-solid icon-status"></i>
+                                    <span>Contact Details (Email & Phone)</span>
+                                </div>
+                                <div class="checklist-item" id="checkEducation">
+                                    <i class="fa-solid icon-status"></i>
+                                    <span>Education Section</span>
+                                </div>
+                                <div class="checklist-item" id="checkExperience">
+                                    <i class="fa-solid icon-status"></i>
+                                    <span>Work Experience Section</span>
+                                </div>
+                                <div class="checklist-item" id="checkSkills">
+                                    <i class="fa-solid icon-status"></i>
+                                    <span>Technical Skills Section</span>
+                                </div>
+                                <div class="checklist-item" id="checkProjects">
+                                    <i class="fa-solid icon-status"></i>
+                                    <span>Projects Section</span>
+                                </div>
+                            </div>
+
+                            <div class="metadata-stats">
+                                <div class="stat-box">
+                                    <span class="stat-val" id="statPages">0</span>
+                                    <span class="stat-lbl">Page Count</span>
+                                </div>
+                                <div class="stat-box">
+                                    <span class="stat-val" id="statWords">0</span>
+                                    <span class="stat-lbl">Word Count</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Resume Rewriter Modal -->
+    <div class="modal-overlay" id="rewriterModal" style="display: none;">
+        <div class="modal-card glass-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-wand-magic-sparkles"></i> ATS Resume Optimizer</h3>
+                <button type="button" class="btn-close-modal" id="btnCloseModal">
+                     <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-desc">Add this ATS-optimized bullet point to your resume to showcase your experience with <strong id="modalSkillName">Skill</strong>:</p>
+                <div class="bullet-box">
+                    <p id="modalBulletText">Sample bullet point goes here...</p>
+                    <button type="button" class="btn-copy" id="btnCopyBullet" title="Copy to clipboard">
+                        <i class="fa-regular fa-copy"></i> Copy
+                    </button>
+                </div>
+                <div class="copy-success-badge" id="copySuccessBadge" style="display: none;">
+                    <i class="fa-solid fa-check"></i> Copied to clipboard!
+                </div>
+                <p class="modal-tip"><i class="fa-solid fa-lightbulb"></i> <strong>Tip:</strong> Tailor the numbers (e.g. percentages, size) to match your actual project achievements!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Files -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
