@@ -1,9 +1,19 @@
-from sentence_transformers import SentenceTransformer, util
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 from skills_extractor import extract_skills
 from database import get_jobs
 
-# Load sentence transformer model once at startup
-model = SentenceTransformer('all-MiniLM-L6-v2')
+def calculate_similarity_tfidf(text1, text2):
+    if not text1.strip() or not text2.strip():
+        return 0.0
+    try:
+        vectorizer = TfidfVectorizer(stop_words='english')
+        tfidf = vectorizer.fit_transform([text1, text2])
+        sim = cosine_similarity(tfidf[0:1], tfidf[1:2])[0][0]
+        return float(sim)
+    except Exception:
+        return 0.0
+
 
 def calculate_formatting_score(sections, page_count, word_count):
     score = 100
@@ -38,8 +48,7 @@ def calculate_match_v2(resume_structure, job_description):
     resume_text = resume_structure["text"]
     
     # 1. Semantic Similarity Score (50% weight)
-    embeddings = model.encode([resume_text, job_description])
-    similarity = util.cos_sim(embeddings[0], embeddings[1]).item()
+    similarity = calculate_similarity_tfidf(resume_text, job_description)
     similarity_score = max(0.0, similarity * 100) # Ensure non-negative
     
     # 2. Skill Match Score (30% weight)
@@ -79,17 +88,9 @@ def recommend_jobs(resume_text, num_recommendations=3):
     if not jobs:
         return []
         
-    # Encode resume and all job descriptions
-    job_descriptions = [job["description"] for job in jobs]
-    texts_to_encode = [resume_text] + job_descriptions
-    
-    embeddings = model.encode(texts_to_encode)
-    resume_embedding = embeddings[0]
-    job_embeddings = embeddings[1:]
-    
     recommendations = []
-    for idx, job in enumerate(jobs):
-        sim = util.cos_sim(resume_embedding, job_embeddings[idx]).item()
+    for job in jobs:
+        sim = calculate_similarity_tfidf(resume_text, job["description"])
         match_percentage = max(0.0, sim * 100)
         
         recommendations.append({

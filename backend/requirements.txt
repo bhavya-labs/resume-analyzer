@@ -1,7 +1,5 @@
 flask
 pymupdf
-sentence-transformers
 scikit-learn
 flask-cors
-spacy
 gunicorn
