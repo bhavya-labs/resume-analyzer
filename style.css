@@ -1330,8 +1330,10 @@ textarea:focus {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 2000;
     animation: fadeIn 0.2s ease-out;
+    overflow-y: auto;
+    padding: 20px;
 }
 
 .modal-card {
@@ -1535,8 +1537,15 @@ textarea:focus {
 
 /* Mobile Responsiveness styling adjustments */
 @media (max-width: 1024px) {
+    html, body {
+        height: auto !important;
+        overflow: auto !important;
+    }
+
     .app-container {
         grid-template-columns: 1fr;
+        height: auto !important;
+        overflow: visible !important;
     }
 
     /* Fixed positioned sliding sidebar for mobile */
@@ -1544,13 +1553,14 @@ textarea:focus {
         position: fixed;
         left: 0;
         top: 0;
-        height: 100vh;
+        height: 100vh !important;
         width: 280px;
         transform: translateX(0); /* Visible state (uncollapsed) */
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         z-index: 1000;
         box-shadow: 4px 0 24px rgba(15, 23, 42, 0.15);
         border-right: 1px solid var(--border-light);
+        overflow-y: auto !important;
     }
 
     /* Hidden state (collapsed) */
@@ -1564,11 +1574,21 @@ textarea:focus {
 
     .main-content {
         padding: 24px;
+        height: auto !important;
+        overflow: visible !important;
     }
 
     .input-grid,
     .dashboard-grid {
         grid-template-columns: 1fr;
+        width: 100%;
+    }
+
+    .card {
+        max-width: 100% !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
     }
 
     /* Reorder dashboard: score gauge and charts to the top on mobile devices */
@@ -1579,6 +1599,11 @@ textarea:focus {
 
     .dashboard-sidebar {
         order: -1; /* Pushes overall score and chart to the top of dashboard page */
+        width: 100%;
+    }
+
+    .dashboard-main {
+        width: 100%;
     }
 }
 
@@ -1598,5 +1623,17 @@ textarea:focus {
 
     .subtitle {
         display: none; /* Hide subtitle on mobile for a clean compact header */
+    }
+
+    .skills-tab-btn {
+        font-size: 12px;
+        padding: 8px 0;
+        gap: 4px;
+    }
+
+    .modal-card {
+        margin: 10px;
+        padding: 20px;
+        max-width: calc(100% - 20px);
     }
 }
