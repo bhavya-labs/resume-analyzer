@@ -1539,13 +1539,16 @@ textarea:focus {
 @media (max-width: 1024px) {
     html, body {
         height: auto !important;
-        overflow: auto !important;
+        overflow-x: hidden !important; /* Force prevent horizontal scroll at document level */
+        overflow-y: auto !important;
     }
 
     .app-container {
         grid-template-columns: 1fr;
         height: auto !important;
-        overflow: visible !important;
+        overflow-x: hidden !important;
+        overflow-y: visible !important;
+        min-width: 0 !important;
     }
 
     /* Fixed positioned sliding sidebar for mobile */
@@ -1575,13 +1578,16 @@ textarea:focus {
     .main-content {
         padding: 24px 24px 60px 24px !important;
         height: auto !important;
-        overflow: visible !important;
+        overflow-x: hidden !important;
+        overflow-y: visible !important;
+        min-width: 0 !important;
     }
 
     .input-grid,
     .dashboard-grid {
         grid-template-columns: 1fr;
         width: 100%;
+        min-width: 0 !important;
     }
 
     .card {
@@ -1589,6 +1595,7 @@ textarea:focus {
         width: 100% !important;
         box-sizing: border-box !important;
         overflow: hidden !important;
+        min-width: 0 !important;
     }
 
     /* Reorder dashboard: score gauge and charts to the top on mobile devices */
@@ -1600,10 +1607,18 @@ textarea:focus {
     .dashboard-sidebar {
         order: -1; /* Pushes overall score and chart to the top of dashboard page */
         width: 100%;
+        min-width: 0 !important;
     }
 
     .dashboard-main {
         width: 100%;
+        min-width: 0 !important;
+    }
+
+    .chart-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
     }
 }
 
@@ -1626,6 +1641,11 @@ textarea:focus {
         display: none; /* Hide subtitle on mobile for a clean compact header */
     }
 
+    /* Optimize tab buttons for small screens to prevent wrapping overflow */
+    .skills-tab-headers {
+        gap: 8px;
+    }
+
     .skills-tab-btn {
         font-size: 12px;
         padding: 8px 0;
@@ -1636,5 +1656,34 @@ textarea:focus {
         margin: 10px;
         padding: 20px;
         max-width: calc(100% - 20px);
+    }
+
+    /* Allow accordion headers to wrap so long titles don't push chevron off-screen */
+    .accordion-header span {
+        white-space: normal !important;
+        word-break: break-word !important;
+    }
+}
+
+/* Stacking the tabs on very small screens to completely eliminate horizontal scrolling */
+@media (max-width: 480px) {
+    .skills-tab-headers {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+        border-bottom: none;
+    }
+
+    .skills-tab-btn {
+        border-bottom: none;
+        border-left: 3px solid transparent;
+        padding: 8px 12px;
+        justify-content: flex-start;
+    }
+
+    .skills-tab-btn.active {
+        border-bottom-color: transparent;
+        border-left-color: var(--primary);
+        background: var(--primary-glow);
     }
 }
